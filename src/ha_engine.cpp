@@ -1,5 +1,5 @@
-#include "../include/haEngine.hpp"
-#include "../include/stopWordsManager.hpp"
+#include "../include/ha_engine.hpp"
+#include "../include/stop_words_manager.hpp"
 // 初始化 jieba 和 swmanager
 HaEngine::HaEngine(int window, int k, const std::string &i, const std::string &o) : 
 jieba("../data/dict/jieba.dict.utf8",
@@ -8,11 +8,11 @@ jieba("../data/dict/jieba.dict.utf8",
       "../data/dict/idf.utf8",
       "../data/dict/stop_words.utf8"),
 swManager("../data/dict/stop_words.utf8"),
-max_window_size(window), top_k(k), inputFile(i), outputFile(o) { out.open(outputFile, std::ios::binary); }
+maxWindowSize(window), topK(k), inputFile(i), outputFile(o) { out.open(outputFile, std::ios::binary); }
 
 void HaEngine::cutWord()
 {
-    if (!ReadUtf8Lines(lines))
+    if (!readUtf8Lines(lines))
     {
         std::cerr << "[ERROR] cannot open input file: " << inputFile << std::endl;
         std::cerr << "[HINT ] create a UTF-8 file named '" << inputFile << "' with Chinese sentences." << std::endl;
@@ -30,36 +30,36 @@ void HaEngine::cutWord()
             std::vector<std::string> word;
             jieba.Cut(sentence.substr(10), word, true);
 
-            if (cur_window_size < max_window_size && curr_time != timeSec)
+            if (curWindowSize < maxWindowSize && currTime != timeSec)
             {
-                curr_time = timeSec;
-                ++cur_window_size;
+                currTime = timeSec;
+                ++curWindowSize;
             }
             else
             {
-                if(curr_time != timeSec)
+                if(currTime != timeSec)
                 {
-                    curr_time = timeSec; // 保持当前时间戳与输入时间戳一致；
-                    remove_outdate_words();
+                    currTime = timeSec; // 保持当前时间戳与输入时间戳一致；
+                    removeOutdatedWords();
                 }
             }
             size_t word_size = word.size();
             for (size_t i{}; i < word_size; i++)
             {
-                if (!swManager.is_stopWord(word[i]))
+                if (!swManager.isStopWord(word[i]))
                 {
-                    history_queue.push(std::make_pair(timeSec, word[i]));
-                    if (freq_map.count(word[i]))
+                    historyQueue.push(std::make_pair(timeSec, word[i]));
+                    if (freqMap.count(word[i]))
                     {
-                        int old_word_count = freq_map[word[i]];
-                        ranking_set.erase({old_word_count, word[i]});
-                        ranking_set.insert({old_word_count + 1, word[i]});
-                        ++freq_map[word[i]];
+                        int old_word_count = freqMap[word[i]];
+                        rankingSet.erase({old_word_count, word[i]});
+                        rankingSet.insert({old_word_count + 1, word[i]});
+                        ++freqMap[word[i]];
                     }
                     else
                     {
-                        freq_map[word[i]] = 1;
-                        ranking_set.insert({1, word[i]});
+                        freqMap[word[i]] = 1;
+                        rankingSet.insert({1, word[i]});
                     }
                 }
             }
@@ -67,32 +67,32 @@ void HaEngine::cutWord()
 
         else
         {
-            top_k = stoi(sentence.substr(17));
+            topK = stoi(sentence.substr(17));
             countTopKWords(out);
         }
     }
 }
 
-void HaEngine::remove_outdate_words()
+void HaEngine::removeOutdatedWords()
 {
-    if (!history_queue.empty())
+    if (!historyQueue.empty())
     {
-        int oldest_time = history_queue.front().first;
-        while (!history_queue.empty() && history_queue.front().first == oldest_time)
+        int oldest_time = historyQueue.front().first;
+        while (!historyQueue.empty() && historyQueue.front().first == oldest_time)
         {
-            auto oldword = history_queue.front();
-            history_queue.pop();
+            auto oldword = historyQueue.front();
+            historyQueue.pop();
 
             std::string word = oldword.second;
-            int old_freq = freq_map[word];
+            int old_freq = freqMap[word];
 
-            ranking_set.erase({old_freq, word});
-            if (freq_map[word] == 1)
-                freq_map.erase(word);
+            rankingSet.erase({old_freq, word});
+            if (freqMap[word] == 1)
+                freqMap.erase(word);
             else
             {
-                --freq_map[word];
-                ranking_set.insert({old_freq - 1, word});
+                --freqMap[word];
+                rankingSet.insert({old_freq - 1, word});
             }
         }
     }
@@ -101,9 +101,9 @@ void HaEngine::remove_outdate_words()
 void HaEngine::countTopKWords(std::ofstream &out)
 {
 
-    out << std::setfill('0') << '[' << std::setw(2) << curr_time / 3600 << ':' << std::setw(2) << (curr_time % 3600) / 60 << ':' << std::setw(2) << curr_time % 60 << "]\n";
-    auto it = ranking_set.rbegin();
-    for (int i{1}; i <= top_k && it != ranking_set.rend(); ++i, ++it)
+    out << std::setfill('0') << '[' << std::setw(2) << currTime / 3600 << ':' << std::setw(2) << (currTime % 3600) / 60 << ':' << std::setw(2) << currTime % 60 << "]\n";
+    auto it = rankingSet.rbegin();
+    for (int i{1}; i <= topK && it != rankingSet.rend(); ++i, ++it)
     {
         std::string word = it->second;
         int freq = it->first;
@@ -114,7 +114,7 @@ void HaEngine::countTopKWords(std::ofstream &out)
 
 void HaEngine::cutWordsTest()
 {
-    if (!ReadUtf8Lines(lines))
+    if (!readUtf8Lines(lines))
     {
         std::cerr << "[ERROR] cannot open input file: " << inputFile << std::endl;
         std::cerr << "[HINT ] create a UTF-8 file named '" << inputFile << "' with Chinese sentences." << std::endl;
@@ -123,19 +123,22 @@ void HaEngine::cutWordsTest()
     for (size_t idx = 0; idx < lines.size(); ++idx)
     {
         const std::string &sentence = lines[idx];
-        int timeSec = (sentence[1] - '0') * 3600 + stoi(sentence.substr(3, 2)) * 60 + stoi(sentence.substr(6, 2));
-
-        std::vector<std::string> word;
-        jieba.Cut(sentence.substr(10), word, true);
-        for (size_t i{}; i < word.size(); i++)
+        if(sentence[1] != 'A')
         {
-            if (!swManager.is_stopWord(word[i]))
-                words.emplace_back(std::make_pair(timeSec, word[i]));
+            int timeSec = (sentence[1] - '0') * 3600 + (stoi(sentence.substr(3, 2)) % 3600) * 60 + stoi(sentence.substr(6, 2)) % 3600;
+
+            std::vector<std::string> word;
+            jieba.Cut(sentence.substr(10), word, true);
+            for (size_t i{}; i < word.size(); i++)
+            {
+                if (!swManager.isStopWord(word[i]))
+                    words.emplace_back(std::make_pair(timeSec, word[i]));
+            }
         }
     }
 }
 
-bool HaEngine::ReadUtf8Lines(std::vector<std::string> &lines)
+bool HaEngine::readUtf8Lines(std::vector<std::string> &lines)
 {
     std::ifstream ifs(inputFile, std::ios::binary);
     if (!ifs.is_open())
@@ -151,7 +154,7 @@ bool HaEngine::ReadUtf8Lines(std::vector<std::string> &lines)
     return true;
 }
 
-void HaEngine::testOutput(std::ofstream &out)
+void HaEngine::testOutput()
 {
     for (size_t i{}; i < words.size(); i++)
         out << "Timestamp: " << words[i].first << "s: " << words[i].second << "\n";

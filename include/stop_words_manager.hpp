@@ -8,11 +8,11 @@
 class StopWordsManager
 {
     private:
-        std::unordered_set<std::string> stop_words;
+        std::unordered_set<std::string> stopWords;
 
     public:
-        StopWordsManager(const std::string& stop_wordsDict);
-        bool is_stopWord(std::string& word);
+        StopWordsManager(const std::string& stopWordsDict);
+        bool isStopWord(std::string& word);
 };
 
 #endif 

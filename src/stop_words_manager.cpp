@@ -1,4 +1,4 @@
-#include "../include/stopWordsManager.hpp"
+#include "../include/stop_words_manager.hpp"
 
 StopWordsManager::StopWordsManager(const std::string& stopWordsDict)
 {
@@ -14,14 +14,14 @@ StopWordsManager::StopWordsManager(const std::string& stopWordsDict)
         if(!word.empty() && word.back() == '\r')
             word.pop_back();
         if(!word.empty())
-            stop_words.insert(word);
+            stopWords.insert(word);
     }
-    std::cout << "Loaded " << stop_words.size() << " stop words.\n";
+    std::cout << "Loaded " << stopWords.size() << " stop words.\n";
 }
 
-bool StopWordsManager::is_stopWord(std::string& word)
+bool StopWordsManager::isStopWord(std::string& word)
 {
-    if(stop_words.count(word))
+    if(stopWords.count(word))
         return true;
     return false;
 }

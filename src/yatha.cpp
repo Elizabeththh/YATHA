@@ -1,5 +1,5 @@
 #include "../third_party/cppjieba/Jieba.hpp"
-#include "../include/haEngine.hpp"
+#include "../include/ha_engine.hpp"
 #include <iostream>
 
 using namespace std;
@@ -8,17 +8,20 @@ using namespace std;
 
 int main()
 {
-    std::string input = "../test_sentences.txt";
-    std::string output = "output.txt";
-    int topk = 3;
-    int windowsize = 600;
+    std::string inputFile = "../test_sentences.txt";
+    std::string outputFile = "output.txt";
+    int topK = 3;
+    int windowSize = 600;
 
-    std::ofstream out(output, std::ios::binary);
+    std::ofstream out(outputFile, std::ios::binary);
     if (!out.is_open()) {
-        std::cerr << "[ERROR] cannot open output file: " << output << std::endl;
+        std::cerr << "[ERROR] cannot open output file: " << outputFile << std::endl;
         return EXIT_FAILURE;
     }
 
-    HaEngine ha(windowsize, topk, input, output);
+    HaEngine ha(windowSize, topK, inputFile, outputFile);
+    ha.jieba.DeleteUserWord("技术创新");
     ha.cutWord();
+    // ha.cutWordsTest();
+    // ha.testOutput();
 }
