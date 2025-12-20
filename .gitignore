@@ -3,5 +3,5 @@ a.out
 test_sentences.txt
 build/
 .xmake
-*.txt
 bin/
+output.txt

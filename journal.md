@@ -1,5 +1,4 @@
 ## v0.1 完成基础滑动窗口热词统计功能
-### 遇到的问题
 1. **输出文件每次都被覆盖的问题**
 ```cpp
         std::ofstream out(outputFile, std::ios::binary);
@@ -155,3 +154,16 @@ make
 这一套繁琐的流程才能开始构建项目。
 
 但是对于 xmake，只要写好配置文件`xmake.lua`（如上面所示，并不繁琐）不管在项目的哪一个目录，构建项目只需执行`xmake`，运行可执行文件只需`xmake run`。~~对于正在焦头烂额赶大作业 DDL 的我来说这确实是 make life easier了。~~
+
+### Windows下使用 Xmake 遇到的编码问题
+![alt text](/img/image.png)
+查阅资料可知：Windows 默认代码页（操作系统中用于表示文本文件中字符的编码）通常是 GBK，这时需要为 MSVC 指定 `/utf8` 参数
+```lua
+if is_plat("windows") then 
+    if has_config("cc", "cl") then  -- MSVC
+        add_cxflags("/utf-8") 
+    else
+        add_cxflags("-finput-charset=UTF-8", "-fexec-charset=UTF-8")  -- 其它编译器（MinGW、Clang等）
+    end
+end
+```

@@ -6,7 +6,7 @@ StopWordsManager::StopWordsManager(const std::string& stopWordsDict)
     if(!ifs.is_open())
     {
         std::cerr << "Error: Cannot open stop words file: " << stopWordsDict;
-        exit;
+        exit(1);
     }
     std::string word;
     while(getline(ifs, word))

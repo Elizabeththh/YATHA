@@ -14,7 +14,7 @@ void HaEngine::cutWord()
     {
         std::cerr << "[ERROR] cannot open input file: " << inputFile << std::endl;
         std::cerr << "[HINT ] create a UTF-8 file named '" << inputFile << "' with Chinese sentences." << std::endl;
-        exit;
+        exit(1);
     }
 
     size_t line_size = lines.size();
@@ -116,7 +116,7 @@ void HaEngine::cutWordsTest()
     {
         std::cerr << "[ERROR] cannot open input file: " << inputFile << std::endl;
         std::cerr << "[HINT ] create a UTF-8 file named '" << inputFile << "' with Chinese sentences." << std::endl;
-        exit;
+        exit(1);
     }
     for (size_t idx = 0; idx < lines.size(); ++idx)
     {
