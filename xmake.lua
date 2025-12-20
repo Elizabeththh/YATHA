@@ -10,8 +10,8 @@ target("yatha")
     add_includedirs("third_party/cppjieba")
 
     set_targetdir("bin")
-    set_rundir("$(projectdir)")
-    set_runargs("input1.txt", "output.txt")
+    set_rundir("data/")
+    set_runargs("-i", "input1.txt", "-o", "output.txt", "-c", "v")
     
     -- 确保跨平台正确编译
     if is_plat("windows") then 

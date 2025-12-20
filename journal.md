@@ -78,7 +78,7 @@ else
 
    - **核心思想**：滑动窗口的删除操作应该以时间戳为单位，而不是以单条数据为单位。只有当新的时间戳到来时，才删除最早时间戳的所有数据，保证窗口始终维持600秒的长度
 
-## v0.2 规范化命名，引入 Xmake 支持跨平台编译，支持 CLI 
+## v0.2 规范化命名，引入 Xmake 支持跨平台编译，支持基本 CLI 
 ### 人生苦短，我选 Xmake
 `xmake.lua`：
 ```lua
@@ -142,7 +142,7 @@ add_custom_target(run
 )
 ```
 1. 可读性强
-lua 是一门脚本语言，语法简洁直观。比起 `CmakeLists.txt` 中一会大写一会小写，各种何意味的宏定义，xmake 的语法绝对是小葱拌豆腐——一清二白了。
+lua 是一门脚本语言，语法简洁直观。比起 `CmakeLists.txt` 中一会大写一会小写，各种何意味的宏定义，xmake 的语法绝对是**小葱拌豆腐——一清二白了**。
 2. 构建流程简单
 Cmake 通常需要
 ```shell
@@ -153,7 +153,7 @@ make
 ```
 这一套繁琐的流程才能开始构建项目。
 
-但是对于 xmake，只要写好配置文件`xmake.lua`（如上面所示，并不繁琐）不管在项目的哪一个目录，构建项目只需执行`xmake`，运行可执行文件只需`xmake run`。~~对于正在焦头烂额赶大作业 DDL 的我来说这确实是 make life easier了。~~
+但是对于 xmake，只要写好配置文件`xmake.lua`（如上面所示，并不繁琐）不管在项目的哪一个目录，构建项目只需执行`xmake`，运行可执行文件只需`xmake run`（若任何依赖文件有更新会重新构建）。~~对于正在焦头烂额赶大作业 DDL 的我来说这确实是 make my life easier了。~~
 
 ### Windows下使用 Xmake 遇到的编码问题
 ![alt text](/img/image.png)
@@ -164,3 +164,87 @@ if is_plat("windows") then
         add_cxflags("-finput-charset=UTF-8", "-fexec-charset=UTF-8", {tools = {"gcc", "clang"}})
 end
 ```
+
+### 扩展命令行参数选项，实现词性筛选功能
+1. 发现 cppjieba 库的作者在 `limonp` 文件夹中偷偷实现了很多很好用的工具函数
+
+比如 `ArgvContext.hpp` 就是一个用来处理命令行参数的类
+
+该类的构造函数：
+```cpp
+ArgvContext(int argc, const char* const * argv) {
+    for(int i = 0; i < argc; i++) {
+      if(StartsWith(argv[i], "-")) {
+        if(i + 1 < argc && !StartsWith(argv[i + 1], "-")) {
+          mpss_[argv[i]] = argv[i+1];
+          i++;
+        } else {
+          sset_.insert(argv[i]);
+        }
+      } else {
+        args_.push_back(argv[i]);
+      }
+    }
+}
+```
+于是在该类中添加一个`public`函数`ReadArgv()`实现命令行参数的读取
+```cpp
+void ReadArgv(std::string& Input, std::string& Output, int& Windows, int& TopK, std::unordered_set<std::string>& ftr, std::unordered_set<std::string>& csr)
+  {
+    if(this->HasKey("-h"))
+    {
+      PrintHelp();
+      exit(0);
+    }
+    if(this->HasKey("-wc"))
+    {
+      PrintPOSHelp();
+      exit(0);
+    }
+    if(this->HasKey("-i"))
+    {
+        Input = mpss_["-i"];
+        if(args_[0] == ".\\yatha.exe")
+          std::cout << "输入文件：" << "data\\" << Input << "\n";
+        else
+          std::cout << "输入文件：" << "data/" << Input << "\n";
+    }
+    else
+    {
+        std::cout << "请指定输入文件\n";
+        exit(1);
+    }
+    if(this->HasKey("-o"))
+    {
+        Output = mpss_["-o"]; 
+        if(args_[0] == ".\\yatha.exe")
+          std::cout << "输出文件：" << "data\\" << Output << "\n";
+        else
+          std::cout << "输出文件：" << "data/" << Output << "\n";
+    }
+    else
+    {
+        std::cout << "请指定输出文件\n";
+        exit(1);
+    }
+    if(this->HasKey("-t"))
+    {
+      Windows = std::stoi(mpss_["-t"]);
+      std::cout << "时间窗口大小：" << Windows << "s\n";
+    }
+    if(this->HasKey("-k"))
+    {
+      TopK = std::stoi(mpss_["-k"]);
+      std::cout << "TopK: " << TopK << "\n";
+    }
+  }
+```
+2. 查阅cppjieba库资料得到词性对照表，根据用户输入来选择**过滤/放行**属于某种词性的词语。
+==（敏感词过滤功能因为测试文本**不方便**生成，所以改做词性筛选）==
+由于cppjieba库本身实现对某些词语的识别就不太准确，如“刘备”竟然被归为音译人名。所以**是否精准地筛选/放行某类词性的词语不在考虑范围内**，这里只注重算法设计。
+
+在 `HaEngin` 类里分别维护无序集 `filter`, `chooser` 用来确定需要过滤/放行的词性，再对原来的 `cutWords()`函数稍加修改即可实现功能。
+
+
+
+
