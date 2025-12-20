@@ -160,10 +160,7 @@ make
 查阅资料可知：Windows 默认代码页（操作系统中用于表示文本文件中字符的编码）通常是 GBK，这时需要为 MSVC 指定 `/utf8` 参数
 ```lua
 if is_plat("windows") then 
-    if has_config("cc", "cl") then  -- MSVC
-        add_cxflags("/utf-8") 
-    else
-        add_cxflags("-finput-charset=UTF-8", "-fexec-charset=UTF-8")  -- 其它编译器（MinGW、Clang等）
-    end
+        add_cxflags("/utf-8", {tools = "cl"})
+        add_cxflags("-finput-charset=UTF-8", "-fexec-charset=UTF-8", {tools = {"gcc", "clang"}})
 end
 ```
