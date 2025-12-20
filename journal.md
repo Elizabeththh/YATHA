@@ -78,3 +78,80 @@ else
 ```
 
    - **核心思想**：滑动窗口的删除操作应该以时间戳为单位，而不是以单条数据为单位。只有当新的时间戳到来时，才删除最早时间戳的所有数据，保证窗口始终维持600秒的长度
+
+## v0.2 规范化命名，引入 Xmake 支持跨平台编译，支持 CLI 
+### 人生苦短，我选 Xmake
+`xmake.lua`：
+```lua
+add_rules("mode.debug", "mode.release")
+
+
+target("yatha")
+    set_kind("binary")
+    add_files("src/*.cpp")
+
+    add_includedirs("include")
+    add_includedirs("third_party/cppjieba")
+
+    set_targetdir("bin")
+    set_rundir("$(projectdir)")
+    set_runargs("input1.txt", "output.txt")
+    
+    if is_plat("linux", "macosx") then 
+        add_syslinks("pthread", "m")
+    end
+```
+完成同等功能所需的 `CmakeLists.txt`:
+```cmake
+cmake_minimum_required(VERSION 3.10)
+
+project(yatha CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+
+
+file(GLOB SOURCES "src/*.cpp")
+
+
+add_executable(yatha ${SOURCES})
+
+target_include_directories(yatha PRIVATE
+    include
+    third_party/cppjieba
+)
+
+if(UNIX OR APPLE)
+    # 查找线程库 (比直接写 "pthread" 更规范)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+
+    target_link_libraries(yatha PRIVATE
+        Threads::Threads 
+        m               
+    )
+endif()
+
+add_custom_target(run
+    COMMAND yatha input1.txt output.txt
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} # 对应 set_rundir("$(projectdir)")
+    DEPENDS yatha
+    COMMENT "Running yatha with default arguments..."
+)
+```
+1. 可读性强
+lua 是一门脚本语言，语法简洁直观。比起 `CmakeLists.txt` 中一会大写一会小写，各种何意味的宏定义，xmake 的语法绝对是小葱拌豆腐——一清二白了。
+2. 构建流程简单
+Cmake 通常需要
+```shell
+mkdir build 
+cd build
+cmake ..
+make
+```
+这一套繁琐的流程才能开始构建项目。
+
+但是对于 xmake，只要写好配置文件`xmake.lua`（如上面所示，并不繁琐）不管在项目的哪一个目录，构建项目只需执行`xmake`，运行可执行文件只需`xmake run`。~~对于正在焦头烂额赶大作业 DDL 的我来说这确实是 make life easier了。~~

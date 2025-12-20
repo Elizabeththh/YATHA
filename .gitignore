@@ -1,2 +1,7 @@
 a.out
-.vscode
+.vscode/
+test_sentences.txt
+build/
+.xmake
+*.txt
+bin/
