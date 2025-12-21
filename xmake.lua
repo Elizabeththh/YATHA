@@ -11,7 +11,7 @@ target("yatha")
 
     set_targetdir("bin")
     set_rundir("data/")
-    set_runargs("-i", "input1.txt", "-o", "output.txt", "-c", "v")
+    set_runargs("-s")
     
     -- 确保跨平台正确编译
     if is_plat("windows") then 
