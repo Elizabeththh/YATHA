@@ -76,7 +76,7 @@ else
 }
 ```
 
-   - **核心思想**：滑动窗口的删除操作应该以时间戳为单位，而不是以单条数据为单位。只有当新的时间戳到来时，才删除最早时间戳的所有数据，保证窗口始终维持600秒的长度
+   - **核心思想**：滑动窗口的删除操作应该以时间戳为单位，而不是以单条数据为单位只有当新的时间戳到来时，才删除最早时间戳的所有数据，保证窗口始终维持600秒的长度
 
 ## v0.2 规范化命名，引入 Xmake 支持跨平台编译，支持基本 CLI 
 ### 人生苦短，我选 Xmake
@@ -142,7 +142,7 @@ add_custom_target(run
 )
 ```
 1. 可读性强
-lua 是一门脚本语言，语法简洁直观。比起 `CmakeLists.txt` 中一会大写一会小写，各种何意味的宏定义，xmake 的语法绝对是**小葱拌豆腐——一清二白了**。
+lua 是一门脚本语言，语法简洁直观比起 `CmakeLists.txt` 中一会大写一会小写，各种何意味的宏定义，xmake 的语法绝对是**小葱拌豆腐——一清二白了**
 2. 构建流程简单
 Cmake 通常需要
 ```shell
@@ -151,9 +151,9 @@ cd build
 cmake ..
 make
 ```
-这一套繁琐的流程才能开始构建项目。
+这一套繁琐的流程才能开始构建项目
 
-但是对于 xmake，只要写好配置文件`xmake.lua`（如上面所示，并不繁琐）不管在项目的哪一个目录，构建项目只需执行`xmake`，运行可执行文件只需`xmake run`（若任何依赖文件有更新会重新构建）。~~对于正在焦头烂额赶大作业 DDL 的我来说这确实是 make my life easier了。~~
+但是对于 xmake，只要写好配置文件`xmake.lua`（如上面所示，并不繁琐）不管在项目的哪一个目录，构建项目只需执行`xmake`，运行可执行文件只需`xmake run`（若任何依赖文件有更新会重新构建）~~对于正在焦头烂额赶大作业 DDL 的我来说这确实是 make my life easier了~~
 
 ### Windows下使用 Xmake 遇到的编码问题
 ![alt text](/img/image.png)
@@ -239,11 +239,87 @@ void ReadArgv(std::string& Input, std::string& Output, int& Windows, int& TopK, 
     }
   }
 ```
-2. 查阅cppjieba库资料得到词性对照表，根据用户输入来选择**过滤/放行**属于某种词性的词语。
+2. 查阅cppjieba库资料得到词性对照表，根据用户输入来选择**过滤/放行**属于某种词性的词语
 ==（敏感词过滤功能因为测试文本**不方便**生成，所以改做词性筛选）==
-由于cppjieba库本身实现对某些词语的识别就不太准确，如“刘备”竟然被归为音译人名。所以**是否精准地筛选/放行某类词性的词语不在考虑范围内**，这里只注重算法设计。
+由于cppjieba库本身实现对某些词语的识别就不太准确，如“刘备”竟然被归为音译人名所以**是否精准地筛选/放行某类词性的词语不在考虑范围内**，这里只注重算法设计
 
-在 `HaEngin` 类里分别维护无序集 `filter`, `chooser` 用来确定需要过滤/放行的词性，再对原来的 `cutWords()`函数稍加修改即可实现功能。
+在 `HaEngin` 类里分别维护无序集 `filter`, `chooser` 用来确定需要过滤/放行的词性，再对原来的 `cutWords()`函数稍加修改即可实现功能
+
+## v0.3 实现词性过滤/放行功能
+在 `HaEngine` 类中增加了 `cutWordFilter` 和 `cutWordChooser` 两个成员函数
+- **原理**：
+  使用 `jieba.Tag()` 替代普通的 `jieba.Cut()`，这样分词结果会包含词性信息（如 `n` 表示名词，`v` 表示动词）
+- **实现逻辑**：
+  - `cutWordFilter`：遍历分词结果，如果某词的词性**不在** `filter` 集合中，且不是停用词，则统计该词
+  - `cutWordChooser`：遍历分词结果，如果某词的词性**在** `chooser` 集合中，且不是停用词，则统计该词
+
+```cpp
+if (!swManager.isStopWord(wordWithCls[i].first) && filter.find(wordWithCls[i].second) == filter.end())
+{
+    // 加入统计...
+}
+```
+**同时增添命令行参数选项 `-wc`，打印词性标识符对应的词性，方便用户进行选择**
+
+
+## v0.7 实现 Web GUI 界面
+使用一个轻量级的 C++ HTTP 库 `cpp-httplib` 来搭建 Web 服务器（引用一个头文件就能启动服务器，非常方便），为用户提供一个 Web GUI 界面。
+
+### 1. 后端实现
+- **集成 httplib**：在 `yatha.cpp` 中引入 `httplib.h`
+- **新增服务器模式**：
+  - 修改 `ArgvContext` 类，增加 `-s` 参数解析，用来启动 HTTP 服务器
+  - 当用户输入 `./yatha -s` 时，启动 HTTP 服务器监听 8080 端口
+- **API 设计**：
+  - 提供 `/api/analyze` POST 接口
+  - 接收前端上传的文本内容，写入临时文件 `temp_input.txt`
+  - 利用 cpp 的 RAII 机制控制 `HaEngine` 生命周期，确保结果写入磁盘后再读取返回
+
+```cpp
+// RAII 确保文件流正确关闭
+{
+    HaEngine ha(..., tempInput, tempOutput);
+    ha.cutWord();
+} // ha 离开域，自动析构，确保文件正确关闭并保存
+```
+
+### 2. 前端实现
+- **界面设计**：创建一个简洁的 HTML 页面，包含文件上传区域，顺便给实验室打一个小小的广告🤭
+- **交互逻辑**：
+  - 支持点击上传和拖拽上传 `.txt` 文件
+  - 使用 `fetch` API 将文件内容发送给后端
+  - 收到响应后实时在页面上显示热词分析结果，无需页面跳转
+
+### 3. 遇到的坑与解决方案
+- **问题1：网页端分析结果显示为空**
+  - 原因：`HaEngine` 还在运行（文件流未关闭）时就尝试读取输出文件，导致读到空内容
+  - 解决办法：将 `HaEngine` 的实例化放入独立作用域 `{}` 中，强制其在读取前析构并刷新文件流
+- **问题2：文件覆盖风险**
+  - 原因：最初使用 `input1.txt` 作为临时文件，容易覆盖用户数据
+  - 解决办法：改用 `temp_input.txt` 和 `temp_output.txt`
+- **问题3：文件挂载问题**
+  - 原因：前端访问静态文件的请求需要处理之后返回
+  如
+  ```cpp
+  svr.Get("/index.html", [](auto& req, auto& res){
+    // 1. 打开 web/index.html
+    // 2. 读取内容
+    // 3. 设置 Content-Type 为 text/html
+    // 4. 发送
+  });
+
+  svr.Get("/style.css", [](auto& req, auto& res){
+    // 1. 打开 web/style.css
+    // ... 重复
+  });
+  ```
+
+  - 解决方案，使用 `svr.set_mount_point()` 函数，一行代码即可实现静态目录的挂载，无需手动处理每个文件的请求。
+  ```cpp
+    // Serve static files from web directory (assuming running from data/ directory)
+    svr.set_mount_point("/", "../web");
+    svr.set_mount_point("/img", "../img");
+  ```
 
 
 
