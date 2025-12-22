@@ -221,7 +221,7 @@
 <body>
     <div class="container">
         <div style="text-align: center;">
-            <a href="https://arcsysu.tech/"><img src="/img/arx-logo.webp" alt="Logo" style="max-width: 200px;"></a>
+            <a href="https://arcsysu.github.io/arcsysu/"><img src="/img/arx-logo.webp" alt="Logo" style="max-width: 200px;"></a>
         </div>
         <h1>YATHA 热词分析</h1>
         <div class="upload-area" onclick="document.getElementById('fileInput').click()">
@@ -524,11 +524,10 @@
 
                 // 根据模式选择API端点
                 let apiUrl = '/api/analyze';
-                if (posConfig.mode === 'filter' && posConfig.pos.length > 0) {
+                if (posConfig.mode === 'filter' && posConfig.pos.length > 0)
                     apiUrl = '/api/analyze-filter';
-                } else if (posConfig.mode === 'allow' && posConfig.pos.length > 0) {
+                else if (posConfig.mode === 'allow' && posConfig.pos.length > 0) 
                     apiUrl = '/api/analyze-chooser';
-                }
 
                 // 准备请求体
                 const fileContent = await file.text();
@@ -557,7 +556,7 @@
                         },
                         body: JSON.stringify({
                             content: fileContent,
-                            pos: posConfig.pos.join(',')
+                            pos: posConfig.pos
                         })
                     });
                 }

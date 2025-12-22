@@ -579,4 +579,68 @@ else
 }
 ```
 
+## v1.1 引入 nlohmann/json 库，从此不用手搓 JSON 字符串解析
+（之前手搓的白写了……this is life）
+```cpp
+std::string inputContent;
+for (size_t i = contentStart; i < jsonBody.length(); i++) {
+    if (jsonBody[i] == '\\' && i + 1 < jsonBody.length()) 
+    {
+        if (jsonBody[i + 1] == 'n') { inputContent += '\n'; i++; }
+        else if (jsonBody[i + 1] == 't') { inputContent += '\t'; i++; }
+        else if (jsonBody[i + 1] == '\"') { inputContent += '\"'; i++; }
+        else if (jsonBody[i + 1] == '\\') { inputContent += '\\'; i++; }
+        else inputContent += jsonBody[i];
+    } 
+    else if (jsonBody[i] == '\"' && (i == 0 || jsonBody[i-1] != '\\')) 
+        break; // 找到content字段的结束引号
+    else 
+        inputContent += jsonBody[i];
+}
+```
+
+因为后续打算实现的**滚动查询**功能打算通过预处理每一秒的 TopK 来实现（生成每一秒TopK的JSON文件），所以打算提前引入方便好用的 JSON 库。
+
+上网查阅资料后发现 nlohmann/json 库广受好评，它可以：
+1. 语法直观，可读性强
+```cpp
+json j = {
+  {"pi", 3.141},
+  {"list", {1, 0, 2}},
+  {"object", {{"currency", "USD"}, {"value", 42.99}}}
+};
+```
+2. 只需引入一个头文件`json.hpp`（与`httplib.h`一样）
+
+3. 与 STL 容器集成度高
+```cpp
+std::unordered_set<std::string> filter;
+if(j.contains("pos"))
+    filter = j["pos"].get<std::unordered_set<std::string>>();
+```
+可以很方便地就将 JSON 数组转换成 STL 容器
+
+将原来 JSON 字符串处理用 `json.hpp` 提供的方法重写
+```cpp
+json j = json::parse(req.body);
+std::string inputContent;
+if(j.contains("content"))
+    inputContent = j["content"];
+else
+{
+    res.set_content("JSON数据未提供\"content\"字段", "text/plain");
+    return;
+}
+std::unordered_set<std::string> filter;
+if(j.contains("pos"))
+    filter = j["pos"].get<std::unordered_set<std::string>>();
+else
+{
+    res.set_content("JSON数据未提供\"pos\"字段", "text/plain");
+    return;
+}
+```
+**代码简洁了很多，且可读性更强了**
+
+
 
