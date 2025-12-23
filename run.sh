@@ -160,7 +160,7 @@ run_project() {
     echo "========================================="
     echo ""
     
-    xmake run yatha
+    xmake run
 }
 
 # 主流程

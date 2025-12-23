@@ -179,7 +179,7 @@ function Run-Project {
     Write-Host "=========================================" -ForegroundColor Cyan
     Write-Host ""
     
-    & xmake run yatha
+    & xmake run
 }
 
 function Main {
