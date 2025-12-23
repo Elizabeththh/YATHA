@@ -9,8 +9,6 @@
 #include <fstream>
 #include <iomanip>
 
-
-
 using Tword = std::pair<int, std::string>;
 class HaEngine
 {
