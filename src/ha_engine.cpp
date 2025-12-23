@@ -159,6 +159,7 @@ void HaEngine::removeOutdatedWords()
     auto outdatedWords = TWManager.getAndRemoveOutdatedWords();
 
     // 遍历过期词，使用 WordRanker 更新词频和排名
+    // 这里可以用c++17标准引入的结构化绑定特性，所以xmake.lua文件要规定c++标准为c++17
     for (const auto &[timestamp, word] : outdatedWords)
         ranker.removeWord(word);
 }

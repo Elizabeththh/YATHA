@@ -45,8 +45,8 @@ void WebServer::handleAnalyze(const httplib::Request &req, httplib::Response &re
     try
     {
         std::string inputContent = req.body;
-        std::string tempInput = "temp_input.txt";
-        std::string tempOutput = "temp_output.txt";
+        std::string tempInput = "temp/temp_input.txt";
+        std::string tempOutput = "temp/temp_output.txt";
 
         saveTempFile(tempInput, inputContent);
 
@@ -93,8 +93,8 @@ void WebServer::handleAnalyzeFilter(const httplib::Request &req, httplib::Respon
         std::string inputContent = j["content"];
         std::unordered_set<std::string> filter = j["pos"].get<std::unordered_set<std::string>>();
 
-        std::string tempInput = "temp_filter_input.txt";
-        std::string tempOutput = "temp_filter_output.txt";
+        std::string tempInput = "temp/temp_filter_input.txt";
+        std::string tempOutput = "temp/temp_filter_output.txt";
 
         saveTempFile(tempInput, inputContent);
 
@@ -145,8 +145,8 @@ void WebServer::handleAnalyzeChooser(const httplib::Request &req, httplib::Respo
         std::string inputContent = j["content"];
         std::unordered_set<std::string> chooser = j["pos"].get<std::unordered_set<std::string>>();
 
-        std::string tempInput = "temp_chooser_input.txt";
-        std::string tempOutput = "temp_chooser_output.txt";
+        std::string tempInput = "temp/temp_chooser_input.txt";
+        std::string tempOutput = "temp/temp_chooser_output.txt";
 
         saveTempFile(tempInput, inputContent);
 
@@ -180,6 +180,7 @@ void WebServer::handleStreamAnalyze(const httplib::Request &req, httplib::Respon
 
     try
     {
+        // 解析 JSON字符串
         json j = json::parse(req.body);
 
         std::string content = j["content"];
@@ -207,8 +208,8 @@ void WebServer::handleStreamAnalyze(const httplib::Request &req, httplib::Respon
         }
 
         // 生成唯一的临时文件名
-        std::string tempInput = generateTempFileName("stream_temp_input");
-        std::string tempOutput = generateTempFileName("stream_temp_output");
+        std::string tempInput = generateTempFileName("temp/sse/stream_temp_input");
+        std::string tempOutput = generateTempFileName("temp/sse/stream_temp_output");
 
         saveTempFile(tempInput, content);
         std::cout << "[文件] 已保存到: " << tempInput << std::endl;

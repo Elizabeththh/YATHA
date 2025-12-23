@@ -28,11 +28,17 @@ bool HaEngineSSE::cutWord()
 
     int threshold = initTimeSec + step;
 
-    while (TWManager.getCurrentTime() < threshold && lineIndex < line_size)
+    while (lineIndex < line_size)
     {
-        const std::string s = lines[lineIndex++];
+        const std::string &s = lines[lineIndex];
         int timeSec = (s[1] - '0') * 3600 + std::stoi(s.substr(3, 2)) * 60 + std::stoi(s.substr(6, 2));
-
+        
+        // 检查时间是否超出范围
+        if (timeSec >= threshold)
+            break;
+        
+        lineIndex++;
+        
         std::vector<std::string> word;
         jieba.Cut(s.substr(10), word, true);
 
@@ -68,10 +74,15 @@ bool HaEngineSSE::cutWordFilter()
 
     int threshold = initTimeSec + step;
 
-    while (TWManager.getCurrentTime() < threshold && lineIndex < line_size)
+    while (lineIndex < line_size)
     {
-        const std::string s = lines[lineIndex++];
+        const std::string &s = lines[lineIndex];
         int timeSec = (s[1] - '0') * 3600 + std::stoi(s.substr(3, 2)) * 60 + std::stoi(s.substr(6, 2));
+        
+        if (timeSec >= threshold)
+            break;
+        
+        lineIndex++;
 
         std::vector<std::pair<std::string, std::string>> wordWithCls;
         jieba.Tag(s.substr(10), wordWithCls);
@@ -108,10 +119,15 @@ bool HaEngineSSE::cutWordChooser()
 
     int threshold = initTimeSec + step;
 
-    while (TWManager.getCurrentTime() < threshold && lineIndex < line_size)
+    while (lineIndex < line_size)
     {
-        const std::string s = lines[lineIndex++];
+        const std::string &s = lines[lineIndex];
         int timeSec = (s[1] - '0') * 3600 + std::stoi(s.substr(3, 2)) * 60 + std::stoi(s.substr(6, 2));
+        
+        if (timeSec >= threshold)
+            break;
+        
+        lineIndex++;
 
         std::vector<std::pair<std::string, std::string>> wordWithCls;
         jieba.Tag(s.substr(10), wordWithCls);

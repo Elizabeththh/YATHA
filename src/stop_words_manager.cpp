@@ -6,7 +6,7 @@ StopWordsManager::StopWordsManager(const std::string& stopWordsDict)
     std::ifstream ifs(stopWordsDict);
     if(!ifs.is_open())
     {
-        std::cerr << "Error: Cannot open stop words file: " << stopWordsDict;
+        std::cerr << "无法打开停用词词典 " << stopWordsDict;
         exit(1);
     }
     std::string word;
@@ -17,7 +17,6 @@ StopWordsManager::StopWordsManager(const std::string& stopWordsDict)
         if(!word.empty())
             stopWords.insert(word);
     }
-    std::cout << "Loaded " << stopWords.size() << " stop words.\n";
 }
 
 bool StopWordsManager::isStopWord(std::string& word)
