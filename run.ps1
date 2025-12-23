@@ -14,11 +14,11 @@ function Detect-Platform {
     
     $platform = [System.Environment]::OSVersion.Platform
     if ($platform -eq "Win32NT") {
-        Write-Host "✓ 检测到平台: Windows $([System.Environment]::OSVersion.Version)" -ForegroundColor Green
+        Write-Host "检测到平台: Windows $([System.Environment]::OSVersion.Version)" -ForegroundColor Green
         Write-Host ""
         return "Windows"
     } else {
-        Write-Host "✗ 未知平台: $platform" -ForegroundColor Red
+        Write-Host "未知平台: $platform" -ForegroundColor Red
         Write-Host "  请使用 Linux/macOS 的 run.sh 脚本" -ForegroundColor Yellow
         exit 1
     }
@@ -137,7 +137,7 @@ function Build-Project {
     & xmake config -y
     
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "✗ 项目配置失败" -ForegroundColor Red
+        Write-Host "项目配置失败" -ForegroundColor Red
         exit 1
     }
     
@@ -147,12 +147,12 @@ function Build-Project {
     & xmake build -y
     
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "✗ 项目构建失败" -ForegroundColor Red
+        Write-Host "项目构建失败" -ForegroundColor Red
         exit 1
     }
     
     Write-Host ""
-    Write-Host "✓ 项目构建成功" -ForegroundColor Green
+    Write-Host "项目构建成功" -ForegroundColor Green
     Write-Host ""
 }
 
@@ -174,10 +174,10 @@ function Main {
         # 检查并安装 xmake
         Write-Host "[2/4] 检查 xmake 构建工具..." -ForegroundColor Blue
         if (Check-Xmake) {
-            Write-Host "✓ xmake 已安装: $script:XmakeVersion" -ForegroundColor Green
+            Write-Host "xmake 已安装: $script:XmakeVersion" -ForegroundColor Green
             Write-Host ""
         } else {
-            Write-Host "✗ xmake 未安装" -ForegroundColor Yellow
+            Write-Host "xmake 未安装" -ForegroundColor Yellow
             Write-Host ""
             
             $response = Read-Host "是否现在安装 xmake? (Y/N)"
@@ -197,7 +197,7 @@ function Main {
         
     } catch {
         Write-Host ""
-        Write-Host "✗ 发生错误: $_" -ForegroundColor Red
+        Write-Host "发生错误: $_" -ForegroundColor Red
         Write-Host $_.ScriptStackTrace -ForegroundColor Red
         exit 1
     }
