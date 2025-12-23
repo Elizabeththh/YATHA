@@ -154,6 +154,39 @@ function Build-Project {
     Write-Host ""
     Write-Host "项目构建成功" -ForegroundColor Green
     Write-Host ""
+    
+    # 检查并创建必要的目录
+    Write-Host "检查运行环境..." -ForegroundColor Cyan
+    $requiredDirs = @("data\temp", "data\temp\sse", "data\dict")
+    foreach ($dir in $requiredDirs) {
+        if (-not (Test-Path $dir)) {
+            Write-Host "创建目录: $dir" -ForegroundColor Yellow
+            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+        } else {
+            Write-Host "目录已存在: $dir" -ForegroundColor Green
+        }
+    }
+    
+    # 检查必要的文件
+    Write-Host ""
+    Write-Host "检查必要文件..." -ForegroundColor Cyan
+    $requiredPaths = @("web\index.html", "data\dict\jieba.dict.utf8")
+    $missingFiles = @()
+    foreach ($path in $requiredPaths) {
+        if (-not (Test-Path $path)) {
+            Write-Host "缺失文件: $path" -ForegroundColor Red
+            $missingFiles += $path
+        } else {
+            Write-Host "文件存在: $path" -ForegroundColor Green
+        }
+    }
+    
+    if ($missingFiles.Count -gt 0) {
+        Write-Host ""
+        Write-Host "警告: 发现缺失文件，程序可能无法正常运行" -ForegroundColor Yellow
+    }
+    
+    Write-Host ""
 }
 
 # 运行项目
