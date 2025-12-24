@@ -1,4 +1,5 @@
-# YatHA(Yet Another Tiny Hotwords Analyzer) 热词统计系统
+# YatHA 热词统计系统
+> Yet another tiny Hotwords Analyzer
 
 ## 项目介绍
 
