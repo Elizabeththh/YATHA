@@ -30,7 +30,7 @@ class WebServer
         WebServer();
 
         void setupRoutes();
-        void start(const std::string &host = "localhost", int port = 8080);
+        void start(const std::string &host = "0.0.0.0", int port = 8080);
 };
 
 #endif // WEB_SERVER_H

@@ -1,7 +1,8 @@
-# YATHA(Yet Another Tiny Hotwords Analyzer) 热词统计系统
+# YatHA(Yet Another Tiny Hotwords Analyzer) 热词统计系统
+
 ## 项目介绍
 
-**YATHA** 是一个高性能的实时热词分析系统，基于滑动时间窗口机制，能够从大量文本数据中快速提取和分析热门词汇，可以为弹幕分析、社交媒体监测、舆情分析等场景提供强大的技术支持。本项目提供 Web GUI 界面，支持直接分析和滚动分析两种模式。滚动分析模式下可以实时绘制热词柱状图和词云图提供热词的直观展示。
+**YatHA** 是一个高性能的实时热词分析系统，基于滑动时间窗口机制，能够从大量文本数据中快速提取和分析热门词汇，可以为弹幕分析、社交媒体监测、舆情分析等场景提供强大的技术支持。本项目提供 Web GUI 界面，支持直接分析和滚动分析两种模式。滚动分析模式下可以实时绘制热词柱状图和词云图提供热词的直观展示。
 
 本项目是数据结构与算法课程大作业的实现，仅供学习交流使用。
 
@@ -45,8 +46,8 @@
 #### Linux
 ```shell
 sudo apt update && sudo apt install git -y
-git clone https://github.com/Elizabeththh/YATHA.git
-cd YATHA
+git clone https://github.com/Elizabeththh/YatHA.git
+cd YatHA
 ./run.sh
 ```
 如果提示没有执行权限，
@@ -60,8 +61,8 @@ sudo chmod +x run.sh
 # 如果没有安装 Homebrew 包管理器，先安装：
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install git
-git clone https://github.com/Elizabeththh/YATHA.git
-cd YATHA
+git clone https://github.com/Elizabeththh/YatHA.git
+cd YatHA
 bash ./run.sh
 ```
 
