@@ -55,8 +55,6 @@ sudo chmod +x run.sh
 ./run.sh
 ```
 
-
-
 #### MacOS
 ```shell
 # 如果没有安装 Homebrew 包管理器，先安装：
@@ -72,12 +70,17 @@ bash ./run.sh
 
 下载仓库源码：
 ![alt text](img/clone.png)
+
 在文件资源管理器中打开项目文件夹，右键空白区域
+
 ![alt text](img/gitbash.png)
+
 在打开的 Git Bash 中输入
 ```shell
 ./run.sh
 ```
+
 ![alt text](img/bash.png)
+
 打开 Git Bash 中提示的 URL 即可
 
