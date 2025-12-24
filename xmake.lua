@@ -20,6 +20,7 @@ target("yatha")
     if is_plat("windows") then 
         add_cxflags("/utf-8", {tools = "cl"})
         add_cxflags("-finput-charset=UTF-8", "-fexec-charset=UTF-8", {tools = {"gcc", "clang"}})
+        add_syslinks("ws2_32", "iphlpapi")
     elseif is_plat("linux", "macosx") then 
         add_syslinks("pthread", "m")
     end
