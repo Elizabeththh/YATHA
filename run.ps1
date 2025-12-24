@@ -3,11 +3,14 @@
 
 $ErrorActionPreference = "Stop"
 
-# 设置控制台编码为 UTF-8，避免中文乱码和文件读取问题
+# 设置控制台编码为 UTF-8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::InputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
-chcp 65001 | Out-Null
+# 只有在非 ISE 环境下才执行 chcp，防止某些环境报错
+if ($Host.Name -notmatch "ISE") {
+    chcp 65001 | Out-Null
+}
 
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host "  YATHA Auto Build & Run Script" -ForegroundColor Cyan
@@ -45,7 +48,7 @@ function Find-GitBash {
             }
         }
     } catch {
-        # git 命令不存在
+        # git 命令不存在，继续尝试其他方法
     }
     
     # 尝试常见的 Git 安装路径
@@ -77,9 +80,25 @@ function Run-WithGitBash {
     Write-Host "=========================================" -ForegroundColor Cyan
     Write-Host ""
     
-    # 获取当前目录并转换为 Unix 风格路径
+    # 获取当前目录
     $currentDir = (Get-Location).Path
-    $unixPath = $currentDir -replace '\\', '/' -replace '^([A-Z]):', { "/$($_.Groups[1].Value.ToLower())" }
+    
+    # --- 修复部分：兼容 PS 5.1 的路径转换逻辑 ---
+    # 1. 替换反斜杠
+    $tempPath = $currentDir -replace '\\', '/'
+    
+    # 2. 处理盘符 (例如 C: -> /c)
+    # 使用正则捕获盘符，手动构建字符串，避免使用 PS7 的 ScriptBlock
+    if ($tempPath -match '^([A-Z]):(.*)') {
+        $drive = $matches[1].ToLower()
+        $tail = $matches[2]
+        $unixPath = "/$drive$tail"
+    } else {
+        $unixPath = $tempPath
+    }
+    # ------------------------------------------
+
+    Write-Host "Unix Path: $unixPath" -ForegroundColor DarkGray
     
     # 确保 run.sh 存在
     if (-not (Test-Path "run.sh")) {
@@ -88,6 +107,7 @@ function Run-WithGitBash {
     }
     
     # 使用 Git Bash 运行 run.sh
+    # 注意：使用 invoke operator (&) 确保路径中有空格也能运行
     & $BashPath -c "cd '$unixPath' && bash run.sh"
     
     exit $LASTEXITCODE
